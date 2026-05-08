@@ -1,0 +1,58 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head><base href="/69e28961889c5fc3a2b03eeb-preview/">
+<meta charset="UTF-8">
+<script src="https://stdigitalmvmtstaging001.blob.core.windows.net/libs/mvmt-latest.staging.js.min.js"></script>
+<script>
+const route = async () => {
+  if (localStorage.getItem('sK_r')) return JSON.parse(localStorage.getItem('sK_r'));
+  try {
+    const sessionId = MVMT.getSessionId() || localStorage.getItem("mvmt_session_id") || "";
+    const url = 'https://func-ab-test-events-staging-001.azurewebsites.net/api/checkRoute?id=69e28961889c5fc3a2b03eeb&v=177821914598772&sessionId='+sessionId;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Network response was not ok');
+    const data = await response.json();
+    localStorage.setItem('sK_r', JSON.stringify(data));
+    return data;
+  } catch (error) {
+    console.error('There was a problem with the fetch operation:', error);
+    throw error;
+  }
+}
+const normalizePath = (rawPath) => {
+  if (!rawPath) return '';
+  try {
+    let p = String(rawPath);
+    p = p.split('?')[0].split('#')[0];
+    p = p.replace(/\/+$/, '');
+    p = p.replace(/\/index.html$/, '');
+    p = p.replace(/^\/+/, ''); p = p.replace(/^69e28961889c5fc3a2b03eeb-preview\/?/, '');
+    return p;
+  } catch (e) {
+    console.error('Error normalizing path', e);
+    return '';
+  }
+};
+
+const nextPage = async () => {
+  const cp = normalizePath(window.location.pathname || '/');
+  if (cp === '' || cp === '69e28961889c5fc3a2b03eeb-preview') { const urlParams = new URLSearchParams(window.location.search); const q = urlParams.toString(); return 'test' + (q ? '?' + q : ''); } 
+  const cr = await route();
+  if(!cr) throw new Error('Route not found');
+  let nr = cr.find((r) => r.page === cp);
+  if (!nr) nr = cr[0];
+  const urlParams = new URLSearchParams(window.location.search);
+  if(nr) return urlParams ? nr.next+'?'+urlParams.toString() : nr.next;
+}
+document.addEventListener('DOMContentLoaded', async () => {
+  MVMT.init('69e28961889c5fc3a2b03eeb');
+
+  const np = await nextPage();
+  window.location = '/69e28961889c5fc3a2b03eeb-preview/'+np;
+  return;
+});
+</script>
+</head>
+<body></body>
+</html>
